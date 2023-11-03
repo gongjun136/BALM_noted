@@ -1,0 +1,13 @@
+<launch>
+	<arg name="rviz" default="true" />
+
+	<param name="voxel_size" type="double" value="2" />
+	<param name="max_iter" type="int" value="2" />
+	<param name="file_path" type="string" value="/home/hyshan/dev_sda3/data/2023-11-01-150856/BALM/" />
+	<node pkg="balm2" type="benchmark_realworld_gj" name="benchmark_realworld_gj" output="screen" />
+
+	<group if="$(arg rviz)">
+		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find balm2)/rviz_cfg/back.rviz" />
+	</group>  
+
+</launch>
