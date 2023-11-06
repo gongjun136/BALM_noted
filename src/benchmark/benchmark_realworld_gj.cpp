@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 
   win_size = x_buf.size();
   printf("The size of poses: %d\n", win_size);
-
+  ros::Duration(1.0).sleep();
   data_show(x_buf, pl_fulls);
   printf("Check the point cloud with the initial poses.\n");
   printf("If no problem, input '1' to continue or '0' to exit...\n");

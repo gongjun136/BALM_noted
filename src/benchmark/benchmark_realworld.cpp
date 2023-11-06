@@ -17,10 +17,10 @@ using namespace std;
 
 /**
  * @brief 定义一个模板函数，用于发布任何类型的点云数据
- * 
- * @tparam T 
- * @param pl 
- * @param pub 
+ *
+ * @tparam T
+ * @param pl
+ * @param pub
  */
 template <typename T>
 void pub_pl_func(T &pl, ros::Publisher &pub)
@@ -111,7 +111,7 @@ void read_file(vector<IMUST> &x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl
   // 遍历每个位姿对应的pcd点云
   for (int m = 0; m < pose_size; m++)
   {
-    // 加载对应的pcd点云并进行位姿变换
+    // 加载对应的pcd点云
     string filename = prename + "full" + to_string(m) + ".pcd";
     pcl::PointCloud<PointType>::Ptr pl_ptr(new pcl::PointCloud<PointType>());
     pcl::PointCloud<pcl::PointXYZI> pl_tem;
@@ -125,7 +125,7 @@ void read_file(vector<IMUST> &x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl
       ap.intensity = pp.intensity;
       pl_ptr->push_back(ap);
     }
-    // 将变换后的点云插入点云数组
+    // 将点云插入点云数组
     pl_fulls.push_back(pl_ptr);
 
     // 将位姿插入点云数组
@@ -228,6 +228,7 @@ int main(int argc, char **argv)
   // 获取位姿状态数量，作为窗口的大小
   win_size = x_buf.size();
   printf("The size of poses: %d\n", win_size);
+  ros::Duration(1.0).sleep();
 
   // 调用函数显示初始的点云和位姿
   data_show(x_buf, pl_fulls);
@@ -258,7 +259,7 @@ int main(int argc, char **argv)
     }
     // 创建用于发送的点云
     pcl::PointCloud<PointType> pl_send;
-    // 发布当前处理后的点云，用于可视化或调试
+    // 发布空点云，rviz替代之前的点云
     pub_pl_func(pl_send, pub_show);
 
     // 创建用于存储点云中心的点云
