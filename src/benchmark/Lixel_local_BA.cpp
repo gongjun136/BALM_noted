@@ -45,9 +45,9 @@ ros::Publisher pub_path, pub_test, pub_show, pub_cute;
 
 int read_pose(vector<double> &tims, PLM(3) & rots, PLV(3) & poss, string prename)
 {
-  string readname = prename + "alidarPose.csv";
+  string readname = prename + "frame_opt.csv";
 
-  cout << readname << endl;
+  // cout << readname << endl;
   ifstream inFile(readname);
 
   if (!inFile.is_open())
@@ -78,7 +78,7 @@ int read_pose(vector<double> &tims, PLM(3) & rots, PLV(3) & poss, string prename
 
       rots.push_back(affT.block<3, 3>(0, 0));
       poss.push_back(affT.block<3, 1>(0, 3));
-      tims.push_back(affT(3, 3));
+      // tims.push_back(affT(3, 3));
       nums.clear();
       ord = 0;
       pose_size++;
@@ -97,7 +97,7 @@ int read_pose(vector<double> &tims, PLM(3) & rots, PLV(3) & poss, string prename
  */
 void read_file(vector<IMUST> &x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl_fulls, string &prename)
 {
-  prename = prename + "/datas/benchmark_realworld/";
+  // prename = prename + "/datas/benchmark_realworld/";
 
   // 定义位姿向量
   PLV(3)
@@ -112,7 +112,10 @@ void read_file(vector<IMUST> &x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl
   for (int m = 0; m < pose_size; m++)
   {
     // 加载对应的pcd点云
-    string filename = prename + "full" + to_string(m) + ".pcd";
+    std::stringstream ss;
+    ss << std::setw(8) << std::setfill('0') << m;
+    string filename = prename + "pcd/" + ss.str() + ".pcd";
+
     pcl::PointCloud<PointType>::Ptr pl_ptr(new pcl::PointCloud<PointType>());
     pcl::PointCloud<pcl::PointXYZI> pl_tem;
     pcl::io::loadPCDFile(filename, pl_tem);
@@ -132,7 +135,7 @@ void read_file(vector<IMUST> &x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl
     IMUST curr;
     curr.R = rots[m];
     curr.p = poss[m];
-    curr.t = tims[m];
+    // curr.t = tims[m];
     x_buf.push_back(curr);
   }
 }
@@ -193,12 +196,13 @@ void data_show(vector<IMUST> x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl_
 
 int main(int argc, char **argv)
 {
+
+  google::InitGoogleLogging(argv[0]);
+  FLAGS_log_dir = "/home/gj/catkin_ws_BALM2/src/BALM/log";
+  FLAGS_alsologtostderr = true;
   // 初始化ROS节点和发布者
   ros::init(argc, argv, "benchmark2");
   ros::NodeHandle n;
-    google::InitGoogleLogging(argv[0]);
-  FLAGS_alsologtostderr = true;
-  FLAGS_log_dir = "/home/gj/catkin_ws_BALM2/src/BALM/log";
   pub_test = n.advertise<sensor_msgs::PointCloud2>("/map_test", 100);
   pub_path = n.advertise<sensor_msgs::PointCloud2>("/map_path", 100);
   pub_show = n.advertise<sensor_msgs::PointCloud2>("/map_show", 100);
@@ -254,10 +258,12 @@ int main(int argc, char **argv)
     eigen_value_array[1] = 1.0 / 16;
     eigen_value_array[2] = 1.0 / 9;
 
-    // 遍历所有的位姿状态,得到所有点云组成的体素地图,并计算体素内的统计信息
+    // poses = &x_buf;
+
+    // 遍历所有的位姿状态
     for (int i = 0; i < win_size; i++)
     {
-      // 主要目的是将输入的点云数据（已经经过旋转和平移变换）分割到具有固定大小的体素中，并更新或创建对应的八叉树结构。
+      // 处理每个位姿对应的点云数据，主要目的是将输入的点云数据（已经经过旋转和平移变换）分割到具有固定大小的体素中，并更新或创建对应的八叉树结构。
       cut_voxel(surf_map, *pl_fulls[i], x_buf[i], i);
     }
     // 创建用于发送的点云
@@ -274,6 +280,7 @@ int main(int argc, char **argv)
     {
       // 提取平面体素
       iter->second->recut(win_size);
+      std::cout << "recut end." << std::endl;
       // 获取所有的平面体素
       iter->second->tras_opt(voxhess, win_size);
       // 展示所有平面体素数据

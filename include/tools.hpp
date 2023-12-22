@@ -287,13 +287,15 @@ void plvec_trans(PLV(3) &porig, PLV(3) &ptran, IMUST &stat)
 
 bool time_compare(PointType &x, PointType &y) {return (x.curvature < y.curvature);}
 
+// 主要用于表示体素中点集的统计信息
 class PointCluster
 {
 public:
-  Eigen::Matrix3d P;
-  Eigen::Vector3d v;
-  int N;
+  Eigen::Matrix3d P;    // 累积了体素中点与其转置的乘积
+  Eigen::Vector3d v;    // 向量累积了体素中的点
+  int N;                // 计数器，记录已添加到该体素中的点的数量
 
+  // 构造函数，用于初始化 P, v, 和 N
   PointCluster()
   {
     P.setZero();
@@ -301,6 +303,7 @@ public:
     N = 0;
   }
 
+  // 重置 P, v, 和 N 为其初始状态
   void clear()
   {
     P.setZero();
@@ -308,6 +311,7 @@ public:
     N = 0;
   }
 
+  // 向体素中添加一个点，并更新 P, v, 和 N
   void push(const Eigen::Vector3d &vec)
   {
     N++;
@@ -315,12 +319,14 @@ public:
     v += vec;
   }
 
+  // 计算并返回体素中点集的协方差矩阵
   Eigen::Matrix3d cov()
   {
     Eigen::Vector3d center = v / N;
     return P/N - center*center.transpose();
   }
 
+  // 重载的加法赋值操作符，用于将两个 PointCluster 对象相加并更新当前对象
   PointCluster & operator+=(const PointCluster &sigv)
   {
     this->P += sigv.P;
@@ -330,6 +336,7 @@ public:
     return *this;
   }
 
+  // 使用给定的状态 stat 变换 PointCluster
   void transform(const PointCluster &sigv, const IMUST &stat)
   {
     N = sigv.N;
@@ -338,6 +345,7 @@ public:
     P = stat.R*sigv.P*stat.R.transpose() + rp + rp.transpose() + N*stat.p*stat.p.transpose();
   }
 
+  // 使用给定的状态 R和p 变换 PointCluster
   void transform(const PointCluster &sigv, const Eigen::Matrix3d &R, const Eigen::Vector3d &p)
   {
     N = sigv.N;

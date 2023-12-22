@@ -275,12 +275,13 @@ void plvec_trans(PLV(3) &porig, PLV(3) &ptran, IMUST &stat)
 
 bool time_compare(PointType &x, PointType &y) {return (x.curvature < y.curvature);}
 
+// 主要用于表示体素中点集的统计信息
 class PointCluster
 {
 public:
-  Eigen::Matrix3d P;
-  Eigen::Vector3d v;
-  int N;
+  Eigen::Matrix3d P;    // 累积了体素中点与其转置的乘积
+  Eigen::Vector3d v;    // 向量累积了体素中的点
+  int N;                // 计数器，记录已添加到该体素中的点的数量
 
   #ifdef POINT_NOISE
   Eigen::Matrix<double, 6, 6> P_cov; Eigen::Matrix3d v_cov;

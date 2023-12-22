@@ -25,6 +25,8 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
 find_package(Ceres REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLOG REQUIRED libglog)
 
 catkin_package(
   CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs 
@@ -37,6 +39,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   ${CERES_INCLUDE_DIRS}
+  ${GLOG_INCLUDE_DIRS}
 )
 
 add_executable(consistency src/simulation/consistency.cpp)
@@ -46,10 +49,10 @@ add_executable(benchmark_virtual src/benchmark/benchmark_virtual.cpp)
 target_link_libraries(benchmark_virtual ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(benchmark_realworld src/benchmark/benchmark_realworld.cpp)
-target_link_libraries(benchmark_realworld ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(benchmark_realworld ${catkin_LIBRARIES} ${PCL_LIBRARIES}  ${GLOG_LIBRARIES})
 
-add_executable(benchmark_realworld_gj src/benchmark/benchmark_realworld_gj.cpp)
-target_link_libraries(benchmark_realworld_gj ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+# add_executable(benchmark_realworld_gj src/benchmark/benchmark_realworld_gj.cpp)
+# target_link_libraries(benchmark_realworld_gj ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(PA_test src/compare_test/PA_test.cpp)
 target_link_libraries(PA_test ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${CERES_LIBRARIES})
@@ -63,4 +66,9 @@ target_link_libraries(BALM1_test ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 add_executable(EF_test src/compare_test/EF_test.cpp src/compare_test/SE3/SO3.cpp src/compare_test/SE3/SE3.cpp)
 target_link_libraries(EF_test ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
+add_executable(block_BA src/benchmark/block_BA.cpp)
+target_link_libraries(block_BA ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${GLOG_LIBRARIES})
+
+add_executable(Lixel_local_BA src/benchmark/Lixel_local_BA.cpp)
+target_link_libraries(Lixel_local_BA ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${GLOG_LIBRARIES})
 
